@@ -6,11 +6,19 @@ const initialItems = [
 ];
 
 export default function App () {
+  const [items, setItems] = useState ([]);
+
+  function handleAddItems (item) {
+    setItems (items => [...items, item]);
+  }
+  function handleDelItems (id) {
+    setItems (items => items.filter (item => item.id !== id));
+  }
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackagingList />
+      <Form onAddItems={handleAddItems} />
+      <PackagingList items={items} onDeleteItem={handleDelItems} />
       <Stats />
     </div>
   );
@@ -20,7 +28,7 @@ function Logo () {
   return <h1>🌴 Far Away 👜</h1>;
 }
 
-function Form () {
+function Form({onAddItems}) {
   const [description, setDescription] = useState ('');
   const [quantity, setQuantity] = useState (1);
 
@@ -29,8 +37,7 @@ function Form () {
 
     if (!description) return;
     const newItem = {description, quantity, packed: false, id: Date.now ()};
-    // Now we need to pass this newItem to component PackagingList
-    console.log (newItem);
+    onAddItems (newItem);
 
     // Return the quantity and description to the default values
     setQuantity (1);
@@ -58,20 +65,22 @@ function Form () {
   );
 }
 
-function PackagingList () {
+function PackagingList({items, onDeleteItem}) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map (item => <Item itemProp={item} key={item.id} />)}
+        {items.map (item => (
+          <Item itemProp={item} onDeleteItem={onDeleteItem} key={item.id} />
+        ))}
       </ul>
     </div>
   );
 }
-function Item({itemProp}) {
+function Item({itemProp, onDeleteItem}) {
   return (
     <li style={itemProp.packed ? {textDecoration: 'line-through'} : {}}>
       <span>{itemProp.quantity} {itemProp.description}</span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem (itemProp.id)}>❌</button>
     </li>
   );
 }
